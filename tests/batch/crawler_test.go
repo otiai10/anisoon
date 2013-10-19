@@ -5,10 +5,10 @@ import (
   "testing"
 )
 
-func TestTest(t *testing.T) {
+func TestHealth(t *testing.T) {
+  statusCode := batch.SyobocalAPIStatus()
   expected := 200
-  state := batch.SyobocalAPIStatus()
-  if state != expected {
-    t.Error("Expected '%v', Actual '%v'", expected, state)
+  if statusCode != expected {
+    t.Error("Expected '%v', Actual '%v'", expected, statusCode)
   }
 }

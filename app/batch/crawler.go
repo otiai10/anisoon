@@ -1,13 +1,10 @@
 package batch
 
 import (
-  "net/http"
+  "github.com/otiai10/anisoon/app/models/api"
 )
 
 func SyobocalAPIStatus() int {
-  resp, err := http.Get("http://cal.syoboi.jp/db.php?Command=TitleLookup&TID=1")
-  if err != nil {
-    panic(err)
-  }
+  resp := syobocalAPI.Health()
   return resp.StatusCode
 }
