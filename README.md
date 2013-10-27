@@ -3,11 +3,9 @@ anisoon
 
 anisoon is back
 
-Test
+Before All, Run the Test!
 =========
-
 ```sh
-cd tests/batch
-go test -i
-go test
+go test -i ./tests/...
+go test ./tests/...
 ```
