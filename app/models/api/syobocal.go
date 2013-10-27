@@ -6,17 +6,33 @@ import (
   "fmt"
   "strconv"
   "encoding/xml"
+  "io/ioutil"
 )
-
-type TitleLookupResponse struct {
-  Result
-  TitleItems []TitleItem
-}
 type Result struct {
   Code    string
   Message string
 }
+
 type TitleItem struct {
+  XMLName    xml.Name `xml:"TitleItem"`
+  TID        int      `xml:"TID"`
+  LastUpdate string   `xml:"LastUpdate"`
+  Title      string   `xml:"Title"`
+  ShortTitle string   `xml:"ShortTitle"`
+  TitleYomi  string   `xml:"TitleYomi"`
+  Comment    string   `xml:"Comment"`
+  FirstYear  int      `xml:"FirstYear"`
+  FirstMonth int      `xml:"FirstMonth"`
+  Cat        int      `xml:"Cat"`// 1がアニメ,10がアニメ再放送
+}
+type TitleItems struct {
+  XMLName    xml.Name `xml:"TitleItems"`
+  TitleItem  []TitleItem
+}
+type ResponseRoot struct {
+  XMLName    xml.Name    `xml:"TitleLookupResponse"`
+  Result     Result      `xml:"Result"`
+  TitleItems TitleItems  `xml:"TitleItems"`
 }
 
 var baseURL = "http://cal.syoboi.jp/db.php?TID=*&Command=TitleLookup"
@@ -37,7 +53,11 @@ func FindThisWeek() bool {
   dur, _ := time.ParseDuration("168h")
   y,m,d := time.Now().Add(-dur).Date()
   lastUpdate := strconv.Itoa(y)+ strconv.Itoa(int(m)) + strconv.Itoa(d)
-  lastUpdate = lastUpdate + "_0000-"
+  lastUpdate = lastUpdate + "_000000-"
+  fmt.Println(
+    baseURL,
+    lastUpdate,
+  )
   resp, err := http.Get(baseURL + "&LastUpdate=" + lastUpdate)
   if err != nil {
     panic(err)
@@ -45,15 +65,13 @@ func FindThisWeek() bool {
   if resp.Header.Get("Content-Type") == "text/xml" {
     panic("Content-Type is not 'text/xml'")
   }
-  fmt.Printf("-----------------------------------------------------\n")
-  fmt.Printf("%v\n", resp.Body)
-  fmt.Printf("-----------------------------------------------------\n")
-  fmt.Printf("=====================================================\n")
-  decoder := xml.NewDecoder(resp.Body)
-  titleLookupResponse := TitleLookupResponse{}
-  err = decoder.Decode(&titleLookupResponse)
-  fmt.Printf("200がほしい%v\n", titleLookupResponse)
-  fmt.Printf("200がほしい%v\n", titleLookupResponse.Result.Code)
-  fmt.Printf("=====================================================\n")
+  defer resp.Body.Close()
+  body,_ := ioutil.ReadAll(resp.Body)
+  xmlRoot := ResponseRoot{}
+  err2 := xml.Unmarshal(body, &xmlRoot)
+  if err2 != nil {
+    panic(err2)
+  }
+  fmt.Printf("%+v\n", xmlRoot.Result)
   return true
 }
