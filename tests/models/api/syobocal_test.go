@@ -3,10 +3,11 @@ package syobocalAPI
 import (
   "github.com/otiai10/anisoon/app/models/api"
   "testing"
-  "fmt"
 )
 
 func TestFindThisWeek(t *testing.T) {
-  toriaezu_bool := syobocalAPI.FindThisWeek()  
-  fmt.Printf("%v",toriaezu_bool)
+  titles := syobocalAPI.FindThisWeek()  
+  if len(titles) < 1 {
+    t.Error("レスポンスが一件も無いよ")
+  }
 }
