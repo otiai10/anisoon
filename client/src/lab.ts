@@ -47,6 +47,7 @@ module Anisoon {
         public anisons: Anisoon.Anisons;
 
         constructor(){
+            anisonList = anisonList.reverse();
             var list = [];
             _.each(anisonList, (anison,index) => {
                 anison.sequence = index;//playNextのために連番が必要
