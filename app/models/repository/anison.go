@@ -2,14 +2,7 @@ package anison
 
 import (
 	"anisoon/app/models/api"
-	"fmt"
 )
-
-// 今後色々変えましょう
-type Anison struct {
-    AnimeTitle string
-    SongTitle  string
-}
 
 var (
 	CategoryAnime = 1
@@ -19,19 +12,17 @@ var (
  * models/apiを使ってAPIレスポンスを取得し
  * アニソンを抽出し、そのリストを返す
  */
-//func Find() []Anison {
-func Find() bool {
+func Find() []syobocalAPI.Anison {
+	list := []syobocalAPI.Anison{}
 	animeList := syobocalAPI.FindThisWeek()
 	for _,a := range animeList {
 		if a.Cat != CategoryAnime {
 			continue
 		}
-		anison := a.ToAnisonList()
-
-		if anison {
-			fmt.Println("hoge")
+		for _, song := range a.ToAnisonList() {
+			list = append(list, song)
 		}
 	}
 
-	return true
+	return list
 }

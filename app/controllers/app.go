@@ -10,9 +10,6 @@ type App struct {
 }
 
 func (c App) Index() revel.Result {
-	anison := anison.Find()
-	if anison == false {
-		panic(anison)
-	}
-	return c.Render()
+	anisonList := anison.Find()
+	return c.Render(anisonList)
 }

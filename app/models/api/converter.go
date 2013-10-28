@@ -1,22 +1,47 @@
 package syobocalAPI
 
 import (
-	"fmt"
 	"regexp"
 )
 
 var (
 	RegexMatchAll = -1
+	TypeOpening   = 0
+	TypeEnding    = 1
 )
 
-func (t TitleItem)ToAnisonList() bool {
+type Anison struct {
+	AnimeTitle  string
+	AnimeID     int
+	AnisonTitle string
+	AnisonType  int
+}
 
-	fmt.Printf("[%v]\n", t.Title)
+func (t TitleItem)ToAnisonList() []Anison {
+
+	anisonList := []Anison{}
+	anison := Anison{}
 	comment := t.Comment
 	re := regexp.MustCompile("オープニングテーマ.*「(.*)」")
-	fmt.Printf("%q\n", re.FindAllStringSubmatch(comment, RegexMatchAll))
+    for _,m := range re.FindAllStringSubmatch(comment, RegexMatchAll) {
+		anison = Anison{
+			AnimeTitle:  t.Title,
+			AnimeID:     t.TID,
+			AnisonTitle: m[1],
+			AnisonType:  TypeOpening,
+		}
+		anisonList = append(anisonList, anison)
+    }
 	re = regexp.MustCompile("エンディングテーマ.*「(.*)」")
-	fmt.Printf("%q\n", re.FindAllStringSubmatch(comment, RegexMatchAll))
+    for _,m := range re.FindAllStringSubmatch(comment, RegexMatchAll) {
+		anison = Anison{
+			AnimeTitle:  t.Title,
+			AnimeID:     t.TID,
+			AnisonTitle: m[1],
+			AnisonType:  TypeEnding,
+		}
+		anisonList = append(anisonList, anison)
+    }
 
-	return true
+	return anisonList
 }
