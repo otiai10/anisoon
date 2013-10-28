@@ -16,7 +16,8 @@ module Anison {
             var Anison = Backbone.Model.extend({});
             var Anisons = Backbone.Collection.extend({model: Anison});
             var AnisonView = Backbone.View.extend({
-                tagName: 'li',
+                tagName: 'tr',
+                className: 'table',
                 template: _.template($("#anison-tpl").html()),
                 render: function(): Backbone.View {
                     var tpl = this.template(this.model.toJSON());
@@ -25,7 +26,7 @@ module Anison {
                 }
             })
             var AnisonsView = Backbone.View.extend({
-                tagName: 'ul',
+                tagName: 'table',
                 render : function(): Backbone.View {
                     this.collection.each(anison => {
                         var anisonView = new AnisonView({model:anison});
