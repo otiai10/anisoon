@@ -60,8 +60,8 @@ module Anisoon {
 
     export class Anison extends Backbone.Model {
         getYoutubeHash(done) {
-            console.log(this.get("AnisonTitle"));
-            var query = this.get("AnisonTitel") + "+" + this.get("AnimeTitle");
+            var query = this.get("AnisonTitle") + "+" + this.get("AnimeTitle");
+            console.log(query);
             $.get(
                 "http://gdata.youtube.com/feeds/api/videos",
                 {
