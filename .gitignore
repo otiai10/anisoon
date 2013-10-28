@@ -1,6 +1,11 @@
+# revelのコンパイル産物
 test-results/
 tmp/
+routes/
+
+# ビルド後のJS
 public/js/src/*.js
 
+# IntelliJ/IDEA
 .idea/*
 anisoon.iml
