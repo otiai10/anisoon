@@ -13,21 +13,49 @@ var anisonList = anisonList || [];
 var lab: Anisoon.Lab;
 
 var onYouTubePlayerReady = (playerId) => {
-    this.player = document.getElementById("player");
-    this.player.playVideo();
-    this.isPlayerReady = true;
-}
+    lab.player = document.getElementById("player");
+    lab.player.playVideo();
+    lab.isPlayerReady = true;
+    lab.player.addEventListener("onStateChange", "listenStateChange");
+};
+// onYouTubePlayerReadyはモジュール化できないけど、これとかはいける気がする.
+// 気がするだけ
+var listenStateChange = function(state){
+    switch(state){
+        case Anisoon.PlayerState.Ended:
+            lab.anisons.playNext();
+    }
+};
 
 module Anisoon {
+
+    export enum PlayerState {
+        Loading   = -1,
+        Ended     = 0,
+        Playing   = 1,
+        Stopped   = 2,
+        Buffering = 3,
+        Headed    = 5
+    }
+
     export class Lab {
 
         public isPlayerReady: boolean = false;
         public player: any;
 
+        public nowPlaying: Anisoon.NowPlaying;
+        public anisons: Anisoon.Anisons;
+
         constructor(){
-            var anisons = new Anisoon.Anisons(anisonList);
+            var list = [];
+            _.each(anisonList, (anison,index) => {
+                anison.sequence = index;//playNextのために連番が必要
+                list.push(new Anisoon.Anison(anison));
+            });
+            this.anisons = new Anisoon.Anisons(list);
             var anisonsView = new Anisoon.AnisonsView({
-                collection : anisons,
+                model: Anisoon.Anison,
+                collection : this.anisons,
                 tagName: 'table',
                 className: 'table'
             });
@@ -39,7 +67,10 @@ module Anisoon {
             //},3000);
         }
 
-        play(vhash: string) {
+        play(nowPlaying: Anisoon.NowPlaying) {
+            this.nowPlaying = nowPlaying;
+            this.renderNowPlaying();
+            var vhash = nowPlaying.getHash();
             if (this.isPlayerReady) {
                 this.player.loadVideoById(vhash);//ByUrlの方がいいかな？
                 return;
@@ -47,7 +78,7 @@ module Anisoon {
             swfobject.embedSWF(
                 "http://www.youtube.com/v/"+ vhash +"?enablejsapi=1&playerapiid=player",//Initial URL
                 "player",// DOM id
-                "400",// width
+                "430",// width
                 "300",// height
                 "8",// SWF Version
                 null,null,
@@ -55,6 +86,11 @@ module Anisoon {
                 {id:"player"}
             );
 
+        }
+
+        private renderNowPlaying() {
+            var nowPlayingView = new Anisoon.NowPlayingView({model:this.nowPlaying});
+            $("#nowplaying-info").html(nowPlayingView.render().$el.html());
         }
     }
 
@@ -76,25 +112,36 @@ module Anisoon {
             $.get(
                 "http://gdata.youtube.com/feeds/api/videos",
                 {
-                    lr : "ja",
                     vq : query,
                     alt: "json"
                 },
                 (data, statusText, xhr) => {
+                    console.log(data);
                     // FIXME : とりあえず
-                    var hash = data.feed.entry[0].id.$t.match(/^.+\/([a-zA-Z0-9_]+)$/)[1];
-                    done(hash);
+                    var video = data.feed.entry[0];
+                    done(video);
                 }
             );
         }
     }
     export class Anisons extends Backbone.Collection {
-        constructor(arr){
-            var list = [];
-            _.each(arr, anison => {
-                list.push(new Anisoon.Anison(anison));
-            });
+
+        private nowPlayingAnison: Anisoon.Anison;
+
+        constructor(list){
             super(list);
+            this.collection = list;
+        }
+
+        playNext() {
+            var done = video => {
+                var nowPlaying = new NowPlaying(this.nowPlayingAnison, video);
+                lab.play(nowPlaying);
+            };
+            // TODO: もうこのへんカオス過ぎる
+            var nextAnison: Anisoon.Anison = new Anisoon.Anison(this.at(lab.nowPlaying.get("anison").sequence + 1).toJSON());
+            this.nowPlayingAnison = nextAnison;
+            nextAnison.getYoutubeHash(done);
         }
     }
     export class AnisonsView extends Backbone.View {
@@ -128,10 +175,39 @@ module Anisoon {
             return this;
         }
         private playByAnisonClick() {
-            var done = hash => {
-                lab.play(hash);
+            var done = video => {
+                var nowPlaying = new NowPlaying(this.model, video);
+                lab.play(nowPlaying);
             };
             this.model.getYoutubeHash(done);
+        }
+    }
+
+    export class NowPlaying extends Backbone.Model {
+        constructor(anison: Anisoon.Anison, video: any){
+            var nowPlayingObject = {
+                anison : anison.toJSON(),
+                video  : {
+                    title : video.title.$t,
+                    hash  : video.id.$t.match(/^.*\/([0-9a-zA-Z_\-]+)$/)[1]
+                }
+            }
+            super(nowPlayingObject);
+        }
+        getHash(): string {
+            return this.get("video").hash;
+        }
+    }
+
+    export class NowPlayingView extends Backbone.View {
+        constructor(options?){
+            super(options);
+        }
+        public template = _.template($("#nowplaying-tpl").html());
+        render(): NowPlayingView {
+            var tpl = this.template(this.model.toJSON());
+            this.$el.html(tpl);
+            return this;
         }
     }
 }
