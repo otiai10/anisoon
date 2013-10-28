@@ -1,7 +1,7 @@
 package batch
 
 import (
-  "github.com/otiai10/anisoon/app/models/api"
+  "anisoon/app/models/api"
 )
 
 func SyobocalAPIStatus() int {

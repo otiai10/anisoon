@@ -1,7 +1,7 @@
 package batch
 
 import (
-  "github.com/otiai10/anisoon/app/batch"
+  "anisoon/app/batch"
   "testing"
 )
 
