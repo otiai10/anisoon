@@ -76,6 +76,7 @@ module Anisoon {
                 this.player.loadVideoById(vhash);//ByUrlの方がいいかな？
                 return;
             }
+            $("header").animate({height:"310px"},500);
             swfobject.embedSWF(
                 "http://www.youtube.com/v/"+ vhash +"?enablejsapi=1&playerapiid=player",//Initial URL
                 "player",// DOM id
