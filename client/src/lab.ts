@@ -109,7 +109,8 @@ module Anisoon {
             }
         }
         getYoutubeHash(done) {
-            var query = this.get("AnisonTitle");// + "+" + this.get("AnimeTitle");
+            //var query = this.get("AnimeTitle") + "+" + this.get("AnisonTitle");
+            var query = this.get("AnisonTitle") + "+" + this.get("AnimeTitle");
             console.log(query);
             $.get(
                 "http://gdata.youtube.com/feeds/api/videos",
@@ -118,9 +119,13 @@ module Anisoon {
                     alt: "json"
                 },
                 (data, statusText, xhr) => {
-                    console.log(data);
-                    // FIXME : とりあえず
-                    var video = data.feed.entry[0];
+                    //console.log(data);
+                    var filtered = _.filter(data.feed.entry, function(entry){
+                        if (entry.title.$t.match("てみた")) return;
+                        return entry;
+                    });
+                    var video = filtered.shift();
+                    console.log(video);
                     done(video);
                 }
             );
