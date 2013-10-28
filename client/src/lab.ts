@@ -10,6 +10,7 @@
 
 var swfobject = swfobject || {};
 var anisonList = anisonList || [];
+var lab: Anisoon.Lab;
 
 var onYouTubePlayerReady = (playerId) => {
     this.player = document.getElementById("player");
@@ -33,9 +34,9 @@ module Anisoon {
             $("#anison-container").html(anisonsView.render().el);
 
             // ためしに
-            setTimeout(() => {
-                this.play("rvhbnKaX3p8");
-            },3000);
+            //setTimeout(() => {
+            //    this.play("rvhbnKaX3p8");
+            //},3000);
         }
 
         play(vhash: string) {
@@ -58,9 +59,32 @@ module Anisoon {
     }
 
     export class Anison extends Backbone.Model {
+        getYoutubeHash(done) {
+            console.log(this.get("AnisonTitle"));
+            var query = this.get("AnisonTitel") + "+" + this.get("AnimeTitle");
+            $.get(
+                "http://gdata.youtube.com/feeds/api/videos",
+                {
+                    lr : "ja",
+                    vq : query,
+                    alt: "json"
+                },
+                (data, statusText, xhr) => {
+                    // FIXME : とりあえず
+                    var hash = data.feed.entry[0].id.$t.match(/^.+\/([a-zA-Z0-9_]+)$/)[1];
+                    done(hash);
+                }
+            );
+        }
     }
     export class Anisons extends Backbone.Collection {
-        public model: Anison;
+        constructor(arr){
+            var list = [];
+            _.each(arr, anison => {
+                list.push(new Anisoon.Anison(anison));
+            });
+            super(list);
+        }
     }
     export class AnisonsView extends Backbone.View {
         constructor(options?){
@@ -69,8 +93,11 @@ module Anisoon {
         render(): AnisonsView {
             this.collection.each(anison => {
                 var anisonView = new AnisonView({
-                    model:anison,
-                    tagName: 'tr'
+                    model: anison,
+                    tagName: 'tr',
+                    events : {
+                        'click .anison-title' : "playByAnisonClick"
+                    }
                 });
                 this.$el.append(anisonView.render().$el);
             });
@@ -79,6 +106,7 @@ module Anisoon {
     }
 
     export class AnisonView extends Backbone.View {
+        public model: Anisoon.Anison;
         constructor(options?){
             super(options);
         }
@@ -88,9 +116,15 @@ module Anisoon {
             this.$el.html(tpl);
             return this;
         }
+        private playByAnisonClick() {
+            var done = hash => {
+                lab.play(hash);
+            };
+            this.model.getYoutubeHash(done);
+        }
     }
 }
 
 $(function(){
-    var anisonLab = new Anisoon.Lab();
+    lab = new Anisoon.Lab();
 });
