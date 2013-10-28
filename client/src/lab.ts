@@ -59,8 +59,19 @@ module Anisoon {
     }
 
     export class Anison extends Backbone.Model {
+        constructor(anison: any){
+            super(anison);
+            switch(this.get("AnisonType")){
+                case 0:
+                    this.set("AnisonTypeText", "OP");
+                    break;
+                case 1:
+                    this.set("AnisonTypeText", "ED");
+                    // break;
+            }
+        }
         getYoutubeHash(done) {
-            var query = this.get("AnisonTitle") + "+" + this.get("AnimeTitle");
+            var query = this.get("AnisonTitle");// + "+" + this.get("AnimeTitle");
             console.log(query);
             $.get(
                 "http://gdata.youtube.com/feeds/api/videos",
