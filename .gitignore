@@ -1,3 +1,6 @@
 test-results/
 tmp/
 routes/
+
+.idea/*
+anisoon.iml
