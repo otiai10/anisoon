@@ -1,6 +1,6 @@
 test-results/
 tmp/
-routes/
+public/js/src/*.js
 
 .idea/*
 anisoon.iml
