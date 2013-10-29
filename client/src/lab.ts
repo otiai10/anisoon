@@ -123,6 +123,8 @@ module Anisoon {
                     //console.log(data);
                     var filtered = _.filter(data.feed.entry, function(entry){
                         if (entry.title.$t.match("てみた")) return;
+                        if (entry.title.$t.match("コピ")) return;
+                        if (entry.title.$t.match("太鼓")) return;
                         return entry;
                     });
                     var video = filtered.shift();
