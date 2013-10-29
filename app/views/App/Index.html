@@ -3,14 +3,14 @@
 {{set . "title" "anisoon"}}
 {{template "header.html" .}}
 
-<header class="hero-unit" style="position:fixed;width:100%;padding-top:40px;background-image:url('/public/img/equalizer.png');background-color:#000;border-radius:0;background-size:55%;background-repeat: no-repeat;background-position: right bottom;">
+<header class="hero-unit" style="box-sizing:border-box;position:fixed;width:100%;padding-top:40px;background-image:url('/public/img/equalizer.png');background-color:#000;border-radius:0;background-size:55%;background-repeat: no-repeat;background-position: right bottom;">
   <div class="container">
     <div class="row">
       <div class="hero-text" style="display:-webkit-box;">
         <div id="nowplaying-info" style="width:55%;color: #f7f7f7;font-size:1.2em;font-weight:bold;margin-right:10px;"></div>
         <div id="player-container" style="width:45%;">
           <div id="player">
-              <h1 style="color:#f7f7f7;">anisooooooooon!!</h1>
+              <h1 style="color:#f7f7f7;">anisooooooon!!</h1>
           </div>
         </div>
       </div>
@@ -35,7 +35,7 @@
     -->
   </div>
   <div class="row">
-    <div class="span12">
+    <div class="span9">
       {{template "partials/lab/lab.html" .anisonList}}
     </div>
   </div>

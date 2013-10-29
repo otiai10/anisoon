@@ -58,7 +58,7 @@ module Anisoon {
                 model: Anisoon.Anison,
                 collection : this.anisons,
                 tagName: 'table',
-                className: 'table table-hover'
+                className: 'table table-hover table-condensed'
             });
             $("#anison-container").html(anisonsView.render().el);
 
@@ -76,7 +76,7 @@ module Anisoon {
                 this.player.loadVideoById(vhash);//ByUrlの方がいいかな？
                 return;
             }
-            $("header").animate({height:"290px"},500);
+            $("header").animate({height:"380px"},500);
             $("h1#anison-list-header").animate({marginTop:"400px"},500);
             swfobject.embedSWF(
                 "http://www.youtube.com/v/"+ vhash +"?enablejsapi=1&playerapiid=player",//Initial URL
