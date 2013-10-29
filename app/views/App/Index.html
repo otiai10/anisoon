@@ -1,13 +1,15 @@
 {{append . "moreScripts" "src/lab.js"}}
+{{append . "moreStyles" "index.css"}}
 
 {{set . "title" "anisoon"}}
 {{template "header.html" .}}
 
-<header class="hero-unit" style="box-sizing:border-box;position:fixed;width:100%;padding-top:40px;background-image:url('/public/img/equalizer.png');background-color:#000;border-radius:0;background-size:55%;background-repeat: no-repeat;background-position: right bottom;">
+<header class="hero-unit contents-top">
   <div class="container">
     <div class="row">
       <div class="hero-text" style="display:-webkit-box;">
-        <div id="nowplaying-info" style="width:55%;color: #f7f7f7;font-size:1.2em;font-weight:bold;margin-right:10px;"></div>
+        <div id="nowplaying-info">
+        </div>
         <div id="player-container" style="width:45%;">
           <div id="player">
               <h1 style="color:#f7f7f7;">anisooooooon!!</h1>
@@ -19,11 +21,12 @@
 </header>
 
 <script type="text/template" id="nowplaying-tpl">
-  <ul>
-    <li><%- anison.AnimeTitle %> <%- anison.AnisonTypeText %></li>
-    <li><%- anison.AnisonTitle %></li>
-    <li><%- video.title %></li>
-  </ul>
+  <div class="xsmall">Anime</div>
+  <div class="xlarge"><%- anison.AnimeTitle %> </div>
+  <div class="xsmall">anison</div>
+  <div class="xlarge"><%- anison.AnisonTypeText %> “<%- anison.AnisonTitle %>”</div>
+  <div class="xsmall">YouTube</div>
+  <div class="xlarge"><%- video.title %></div>
 </script>
 
 <div class="container">

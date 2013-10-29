@@ -1,0 +1,32 @@
+html#html {
+    font-family: "Trebuchet MS";
+}
+
+.hero-unit.contents-top {
+    box-sizing:border-box;
+    position:fixed;
+    width:100%;
+    padding-top:40px;
+    background-image:url('/public/img/equalizer.png');
+    background-color:#000;
+    border-radius:0;
+    background-size:55%;
+    background-repeat:no-repeat;
+    background-position: right bottom;
+    opacity: 0.82;
+}
+
+div#nowplaying-info{
+    width:55%;
+    color:#f7f7f7;
+    font-weight:bold;
+    margin-right:20px;
+}
+
+.xsmall {
+    font-size: x-small;
+}
+.xlarge {
+    font-size: xx-large;
+    line-height: 1em;
+}
