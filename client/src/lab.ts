@@ -76,18 +76,19 @@ module Anisoon {
                 this.player.loadVideoById(vhash);//ByUrlの方がいいかな？
                 return;
             }
-            $("header").animate({height:"380px"},500);
             $("h1#anison-list-header").animate({marginTop:"400px"},500);
-            swfobject.embedSWF(
-                "http://www.youtube.com/v/"+ vhash +"?enablejsapi=1&playerapiid=player",//Initial URL
-                "player",// DOM id
-                "430",// width
-                "300",// height
-                "8",// SWF Version
-                null,null,
-                {allowScriptAccess: "always"},
-                {id:"player"}
-            );
+            $("header").animate({height:"380px"},500,function(){;
+                swfobject.embedSWF(
+                    "http://www.youtube.com/v/"+ vhash +"?enablejsapi=1&playerapiid=player",//Initial URL
+                    "player",// DOM id
+                    "430",// width
+                    "300",// height
+                    "8",// SWF Version
+                    null,null,
+                    {allowScriptAccess: "always"},
+                    {id:"player"}
+                );
+            });
 
         }
 
