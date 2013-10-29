@@ -1,7 +1,7 @@
 /**
- * labスクリプトのエントリポイント
+ * indexスクリプトのエントリポイント
  * build:
- *      `tsc client/src/lab.ts --out public/js/lab.js`
+ *      `tsc client/src/index.ts --out public/js/index.js`
  */
 
 /// <reference path="../external/jquery.d.ts" />
@@ -10,20 +10,20 @@
 
 var swfobject = swfobject || {};
 var anisonList = anisonList || [];
-var lab: Anisoon.Lab;
+var index: Anisoon.Index;
 
 var onYouTubePlayerReady = (playerId) => {
-    lab.player = document.getElementById("player");
-    lab.player.playVideo();
-    lab.isPlayerReady = true;
-    lab.player.addEventListener("onStateChange", "listenStateChange");
+    index.player = document.getElementById("player");
+    index.player.playVideo();
+    index.isPlayerReady = true;
+    index.player.addEventListener("onStateChange", "listenStateChange");
 };
 // onYouTubePlayerReadyはモジュール化できないけど、これとかはいける気がする.
 // 気がするだけ
 var listenStateChange = function(state){
     switch(state){
         case Anisoon.PlayerState.Ended:
-            lab.anisons.playNext();
+            index.anisons.playNext();
     }
 };
 
@@ -38,7 +38,7 @@ module Anisoon {
         Headed    = 5
     }
 
-    export class Lab {
+    export class Index {
 
         public isPlayerReady: boolean = false;
         public player: any;
@@ -147,10 +147,10 @@ module Anisoon {
         playNext() {
             var done = video => {
                 var nowPlaying = new NowPlaying(this.nowPlayingAnison, video);
-                lab.play(nowPlaying);
+                index.play(nowPlaying);
             };
             // TODO: もうこのへんカオス過ぎる
-            var nextAnison: Anisoon.Anison = new Anisoon.Anison(this.at(lab.nowPlaying.get("anison").sequence + 1).toJSON());
+            var nextAnison: Anisoon.Anison = new Anisoon.Anison(this.at(index.nowPlaying.get("anison").sequence + 1).toJSON());
             this.nowPlayingAnison = nextAnison;
             nextAnison.getYoutubeHash(done);
         }
@@ -188,7 +188,7 @@ module Anisoon {
         private playByAnisonClick() {
             var done = video => {
                 var nowPlaying = new NowPlaying(this.model, video);
-                lab.play(nowPlaying);
+                index.play(nowPlaying);
             };
             this.model.getYoutubeHash(done);
         }
@@ -224,5 +224,5 @@ module Anisoon {
 }
 
 $(function(){
-    lab = new Anisoon.Lab();
+    index = new Anisoon.Index();
 });
