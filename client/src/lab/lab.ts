@@ -8,6 +8,8 @@
 /// <reference path="../../external/underscore.d.ts" />
 /// <reference path="../../external/backbone.d.ts" />
 
+/// <reference path="./views/views.ts" />
+
 var swfobject = swfobject || {};
 var anisonList = anisonList || [];
 var labController: Lab.Controller;
@@ -20,6 +22,14 @@ module Lab {
     export class Controller {
         constructor(){
             console.log("This is LabController, DO SOMETHING HERE");
+            var streaming = StreamingFactory.createFromAnisonList(anisonList);
+            console.log(streaming);
+            var streamView = new StreamView({
+                collection:streaming,
+                tagName: 'table',
+                className: 'table'
+            });
+            $("#test-stream").html(streamView.render().el);
         }
     }
 }
@@ -30,14 +40,14 @@ $(function(){
 module Lab {
     // アニメを表現するモデル
     export class Anime extends Backbone.Model {
-        constructor(tid: number, title: string){
+        constructor(animeId: number, title: string){
             super({
-                TID   : tid,
+                ID    : animeId,
                 Title : title
             });
         }
         getId(): number {
-            return this.get("TID");
+            return this.get("ID");
         }
         getTitle(): string {
             return this.get("Title");
@@ -66,7 +76,7 @@ module Lab {
         constructor(anime: Anime, anison: Anison, index: number = 0){
             super({
                 Anime  : anime,
-                Anison : Anison,
+                Anison : anison,
                 Index  : index
             });
         }
@@ -101,13 +111,27 @@ module Lab {
     }
 }
 module Lab {
+    export class StreamingFactory {
+        static createFromAnisonList(anisonList: any[]): Streaming {
+            var entries: Entry[] = [];
+            _.each(anisonList, (anisonObj,i) => {
+                console.log(anisonObj);
+                var anime = new Anime(anisonObj["AnimeID"],anisonObj["AnimeTitle"]);
+                var anison = new Anison(anisonObj["AnisonTitle"],anisonObj["AnisonType"]);
+                var entry = new Entry(anime, anison, i);
+                entries.push(entry);
+            })
+            return new Streaming(entries);
+        }
+    }
+}
+
+module Lab {
     export class Streaming extends Backbone.Collection {
         public nowPlaying: NowPlaying;
         //public streamView: StreamView;
         constructor(entries: Entry[]){
-            super({
-                collection : entries
-            });
+            super(entries);
         }
 
         playNext() {
