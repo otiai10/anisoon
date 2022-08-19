@@ -1,0 +1,47 @@
+name: Daily Update
+on:
+  schedule:
+    # 4:30AM every day
+    - cron: '30 19 * * *'
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Commit fetched files
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  daily-update:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Event check
+      run: echo ${{ github.event_name }}
+    - name: Git Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: main
+        fetch-depth: 0
+    - name: Use Deno Version
+      uses: denolib/setup-deno@v2
+      with:
+        deno-version: '1.24.3'
+    - name: Lint Deno
+      run: deno fmt --check ./models ./scripts
+    - name: Run script
+      env:
+        YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+      run: |
+        deno run --allow-net --allow-write \
+          --allow-env=YOUTUBE_API_KEY \
+          ./scripts/daily-update.ts
+
+    - name: Commit
+      if: ${{ github.event_name == 'schedule' || inputs.commit }}
+      run: |
+        git config --global user.email otiai10+ayanel-ci@gmail.com
+        git config --global user.name "Ayanel CI"
+        d=$(date '+%Y-%m-%d');
+        git add .;
+        git commit -m "Update: ${d}";
+        git push origin main;
