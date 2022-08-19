@@ -5,7 +5,6 @@ import { SyobocalJSONDBEntry } from "../models/syobocal/syobocaldb.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
 
 
-// const API_KEY = "AIzaSyCoJFIJrduGYMLkVL2hsWXreFTRwdbzqU8";
 const YouTubeSearchAPI = "https://youtube.googleapis.com/youtube/v3/search";
 
 const sleep = (msec: number): Promise<void> => {
