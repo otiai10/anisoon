@@ -51,7 +51,7 @@ const __main__ = async () => {
     const ytres = await fetch(YouTubeSearchAPI + "?" + query.toString());
     const response: GoogleAppsScript.YouTube.Schema.SearchListResponse =
       await ytres.json();
-    console.log("YouTube:", ytres.status, ytres.statusText);
+    console.log("YouTube:", ytres.status, ytres.statusText, keyword);
     if (ytres.status != 200) {
       console.error(response);
       throw new Error(
