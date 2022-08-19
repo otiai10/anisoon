@@ -31,10 +31,7 @@ jobs:
     - name: Run script
       env:
         YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-      run: |
-        deno run --allow-net --allow-write \
-          --allow-env=YOUTUBE_API_KEY \
-          ./scripts/daily-update.ts
+      run: deno task updatedb
 
     - name: Commit
       if: ${{ github.event_name == 'schedule' || inputs.commit }}

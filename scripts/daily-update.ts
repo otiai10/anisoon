@@ -10,7 +10,7 @@ const sleep = (msec: number): Promise<void> => {
   return (new Promise((resolve) => setTimeout(() => resolve(), msec)));
 };
 
-const __main__ = async () => {
+const __main__ = async (args: string[]) => {
   // Get latest JSON data from DB
   const db = {
     baseurl: "https://raw.githubusercontent.com/otiai10/syobocal/main/db/",
@@ -35,52 +35,65 @@ const __main__ = async () => {
     return anime.songs?.map((song): SearchItem => ({ anime, song })) || [];
   });
 
+  const dry = args.length && (args[0] == "--dry");
+
   // Execute YouTube search for each
-  const tracks = await Promise.all(items.map(async (item): Promise<Track> => {
-    const keyword = `${item.song.title} ${item.anime.title} ${item.song.label}`;
-    const query = new URLSearchParams({
-      part: "snippet",
-      maxResults: "5",
-      q: `${item.song.title} ${item.anime.title} ${item.song.label}`,
-      regionCode: "JP",
-      type: "video",
-      videoDuration: "short",
-      key: Deno.env.get("YOUTUBE_API_KEY") as string,
-    });
-    await sleep(Math.random() * 10 * 1000);
-    const ytres = await fetch(YouTubeSearchAPI + "?" + query.toString());
-    const response: GoogleAppsScript.YouTube.Schema.SearchListResponse =
-      await ytres.json();
-    console.log("YouTube:", ytres.status, ytres.statusText, keyword);
-    if (ytres.status != 200) {
-      console.error(response);
-      throw new Error(
-        `failed to fetch YouTube: ${ytres.status} ${ytres.statusText}`,
-      );
-    }
-    query.delete("key");
-    return {
-      ...item,
-      youtube: {
-        query: {
-          keyword,
-          params: query.toString(),
-          found: response.items!.length,
-        },
-        videos: (response.items || []).map((item) => ({
-          id: item.id!.videoId!,
-          kind: item.id!.kind!,
-          title: item.snippet!.title!,
-          publishedAt: item.snippet!.publishedAt!,
-          thumbnails: item.snippet!.thumbnails!,
-          channel: {
-            id: item.snippet!.channelId!,
-            title: item.snippet!.channelTitle!,
+  const tracks = await Promise.all(
+    items.map(async (item): Promise<Track | undefined> => {
+      const keyword =
+        `${item.song.title} ${item.anime.title} ${item.song.label}`;
+      const query = new URLSearchParams({
+        part: "snippet",
+        maxResults: "5",
+        q: `${item.song.title} ${item.anime.title} ${item.song.label}`,
+        regionCode: "JP",
+        type: "video",
+        videoDuration: "short",
+        key: Deno.env.get("YOUTUBE_API_KEY") as string,
+      });
+
+      if (dry) {
+        console.log("Query:", keyword);
+        return;
+      }
+      await sleep(Math.random() * 10 * 1000);
+
+      const ytres = await fetch(YouTubeSearchAPI + "?" + query.toString());
+      const response: GoogleAppsScript.YouTube.Schema.SearchListResponse =
+        await ytres.json();
+      console.log("YouTube:", ytres.status, ytres.statusText, keyword);
+      if (ytres.status != 200) {
+        console.error(response);
+        throw new Error(
+          `failed to fetch YouTube: ${ytres.status} ${ytres.statusText}`,
+        );
+      }
+      query.delete("key");
+      return {
+        ...item,
+        youtube: {
+          query: {
+            keyword,
+            params: query.toString(),
+            found: response.items!.length,
           },
-        })),
-      },
-    };
-  }));
+          videos: (response.items || []).map((item) => ({
+            id: item.id!.videoId!,
+            kind: item.id!.kind!,
+            title: item.snippet!.title!,
+            publishedAt: item.snippet!.publishedAt!,
+            thumbnails: item.snippet!.thumbnails!,
+            channel: {
+              id: item.snippet!.channelId!,
+              title: item.snippet!.channelTitle!,
+            },
+          })),
+        },
+      };
+    }),
+  );
+
+  if (dry) return;
 
   // Write to a file
   const dirpath = path.join(
@@ -94,7 +107,7 @@ const __main__ = async () => {
 };
 
 try {
-  __main__();
+  __main__(Deno.args);
 } catch (err) {
   console.log(err);
   Deno.exit(1);
