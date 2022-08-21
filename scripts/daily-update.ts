@@ -35,7 +35,7 @@ const __main__ = async (args: string[]) => {
     return anime.songs?.map((song): SearchItem => ({ anime, song })) || [];
   });
 
-  const dry = args.length && (args[0] == "--dry");
+  const dry = !!(args.length && (args[0] == "--dry"));
 
   // Execute YouTube search for each
   const tracks = await Promise.all(
@@ -93,18 +93,55 @@ const __main__ = async (args: string[]) => {
     }),
   );
 
-  if (dry) return;
-
-  // Write to a file
-  const dirpath = path.join(
-    "db",
-    "tracks",
+  const fpath = path.join(
     ...entry.context.output.split(path.posix.sep).slice(-3, -1),
   );
+  const dirpath = path.join("db", "tracks", fpath);
   const fname = entry.context.output.split(path.posix.sep).at(-1)!;
-  await Deno.mkdir(dirpath, { recursive: true });
-  await Deno.writeTextFile(path.join(dirpath, fname), JSON.stringify(tracks));
+  console.log("Dir:", dirpath);
+  console.log("Fpath:", fpath);
+  console.log("File:", fname);
+
+  // Write to a file
+  await upsertTrackFile(dirpath, fname, tracks as Track[], dry);
+
+  // Update index
+  await updateIndexFile(fpath, fname, dry);
 };
+
+async function upsertTrackFile(
+  dirpath: string,
+  fname: string,
+  tracks: Track[],
+  dry = false,
+) {
+  console.log("Track file:", path.join(dirpath, fname));
+  if (dry) {
+    console.log(tracks);
+  } else {
+    await Deno.mkdir(dirpath, { recursive: true });
+    await Deno.writeTextFile(path.join(dirpath, fname), JSON.stringify(tracks));
+  }
+}
+
+async function updateIndexFile(fpath: string, fname: string, dry = false) {
+  const entrypath = path.join("", fpath, fname);
+  const indexpath = path.join("db", "tracks", "index.json");
+  const entries = [
+    { path: `/${entrypath}`, updated: (new Date()).toString() },
+    ...(JSON.parse(await Deno.readTextFile(indexpath)) as {
+      path: string;
+      updated: string;
+    }[])
+      .filter((entry) => entry.path != `/${entrypath}`),
+  ];
+  console.log("Index file:", indexpath);
+  if (dry) {
+    console.log(entries);
+  } else {
+    await Deno.writeTextFile(indexpath, JSON.stringify(entries, null, 2));
+  }
+}
 
 try {
   __main__(Deno.args);
