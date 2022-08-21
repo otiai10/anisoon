@@ -27,7 +27,7 @@ jobs:
       with:
         deno-version: '1.24.3'
     - name: Lint Deno
-      run: deno fmt --check ./models ./scripts
+      run: deno fmt --check --ignore=./db
     - name: Run script
       env:
         YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
