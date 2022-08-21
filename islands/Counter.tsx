@@ -1,21 +1,66 @@
 /** @jsx h */
 import { h } from "preact";
-import { useState } from "preact/hooks";
-import { tw } from "@twind";
+import { useEffect, useMemo, useState } from "preact/hooks";
 
-import { Button } from "../components/Button.tsx";
+import {
+  PlayerState,
+  YouTubePlayerDelegate,
+  YouTubePlayerView,
+} from "https://deno.land/x/fresh_youtube@0.2.0/mod.ts";
+// } from "../../fresh-youtube/mod.ts";
 
-interface CounterProps {
-  start: number;
-}
+import { Track } from "../models/anisoon/index.ts";
 
-export default function Counter(props: CounterProps) {
-  const [count, setCount] = useState(props.start);
+export default function MyIsland() {
+  const [playerState, setPlayerState] = useState<PlayerState>(
+    PlayerState.UNSTARTED,
+  );
+
+  const [playlist, setPlaylist] = useState<Track[]>([]);
+  useEffect(() => {
+    fetch("/api/tracks").then((res) => res.json()).then(setPlaylist);
+  }, []);
+
+  const delegate = useMemo(
+    () => new YouTubePlayerDelegate({ stateUpdater: setPlayerState }),
+    [],
+  );
+
   return (
-    <div class={tw`flex gap-2 w-full`}>
-      <p class={tw`flex-grow-1 font-bold text-xl`}>{count}</p>
-      <Button onClick={() => setCount(count - 1)}>-1</Button>
-      <Button onClick={() => setCount(count + 1)}>+1</Button>
+    <div>
+      <YouTubePlayerView
+        style={{ width: "100%", height: "60vh" }}
+        delegate={delegate}
+      />
+
+      <div>{playerState}</div>
+
+      <div>
+        <button
+          onClick={() => delegate.play()}
+          disabled={playerState == PlayerState.PLAYING}
+          style={{
+            borderColor: playerState == PlayerState.PLAYING
+              ? "transparent"
+              : "blue",
+            borderWidth: "2px",
+          }}
+        >
+          PLAY
+        </button>
+        <button
+          onClick={() => delegate.pause()}
+          disabled={playerState == PlayerState.PAUSED}
+          style={{
+            borderColor: playerState == PlayerState.PAUSED
+              ? "transparent"
+              : "green",
+            borderWidth: "2px",
+          }}
+        >
+          PAUSE
+        </button>
+      </div>
     </div>
   );
 }

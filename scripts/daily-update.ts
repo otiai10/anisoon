@@ -1,4 +1,4 @@
-// @deno-type="https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/google-apps-script/apis/youtube_v3.d.ts"
+import type {} from "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/google-apps-script/apis/youtube_v3.d.ts";
 
 import { SearchItem, Track } from "../models/anisoon/index.ts";
 import { SyobocalJSONDBEntry } from "../models/syobocal/syobocaldb.ts";
