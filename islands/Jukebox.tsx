@@ -63,6 +63,7 @@ export default function Jukebox() {
           <div class={tw`flex flex-col`}>
             <YouTubePlayerView
               class={tw`w-80 h-60`}
+              style={{ boxShadow: `0 0 12px -4px #101020` }}
               delegate={delegate}
             />
           </div>
