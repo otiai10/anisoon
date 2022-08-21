@@ -1,8 +1,9 @@
-import type { } from "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/google-apps-script/apis/youtube_v3.d.ts";
+import type {} from "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/google-apps-script/apis/youtube_v3.d.ts";
 
 import { SearchItem, Track } from "../models/anisoon/index.ts";
 import { SyobocalJSONDBEntry } from "../models/syobocal/syobocaldb.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
+import * as time from "https://deno.land/std@0.152.0/datetime/mod.ts";
 
 const YouTubeSearchAPI = "https://youtube.googleapis.com/youtube/v3/search";
 
@@ -15,11 +16,10 @@ const __main__ = async (args: string[]) => {
   const db = {
     baseurl: "https://raw.githubusercontent.com/otiai10/syobocal/main/db/",
   };
-  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const year = yesterday.getFullYear(),
-    month = ("0" + (yesterday.getMonth() + 1)).slice(-2),
-    date = ("0" + yesterday.getDate()).slice(-2);
-  const endpoint = db.baseurl + `${year}/${month}/${date}.json`;
+  const UTC_JST = 9 * time.HOUR;
+  const _1_DAY = 1 * time.DAY;
+  const yesterday = new Date(Date.now() + UTC_JST - _1_DAY);
+  const endpoint = db.baseurl + time.format(yesterday, "yyyy/MM/dd") + ".json";
   const dbres = await fetch(endpoint);
   console.log("DB:", dbres.status, dbres.statusText);
   const entry: SyobocalJSONDBEntry = await dbres.json();
