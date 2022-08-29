@@ -2,8 +2,7 @@
   "tasks": {
     "start": "deno run -A --watch=static/,routes/ dev.ts",
     "fmt": "deno fmt --ignore=db",
-    "updatedb": "deno run --allow-net --allow-write --allow-read --allow-env=YOUTUBE_API_KEY ./scripts/daily-update.ts",
-    "updatedb:dry": "deno run --allow-net --allow-write --allow-read --allow-env=YOUTUBE_API_KEY ./scripts/daily-update.ts --dry"
+    "updatedb": "deno run --allow-net --allow-write --allow-read --allow-env=YOUTUBE_API_KEY ./scripts/daily-update.ts"
   },
   "importMap": "./import_map.json"
 }

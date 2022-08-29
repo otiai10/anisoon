@@ -4,6 +4,7 @@ import { SearchItem, Track } from "../models/anisoon/index.ts";
 import { SyobocalJSONDBEntry } from "../models/syobocal/syobocaldb.ts";
 import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
 import * as time from "https://deno.land/std@0.152.0/datetime/mod.ts";
+import * as flags from "https://deno.land/std@0.152.0/flags/mod.ts";
 
 const YouTubeSearchAPI = "https://youtube.googleapis.com/youtube/v3/search";
 
@@ -13,12 +14,20 @@ const sleep = (msec: number): Promise<void> => {
 
 const __main__ = async (args: string[]) => {
   // Get latest JSON data from DB
+
+  // --date=2022-08-29 --debug
+  const opts = flags.parse(args, { alias: { d: "date", D: "debug" } });
+
   const db = {
     baseurl: "https://raw.githubusercontent.com/otiai10/syobocal/main/db/",
   };
+
   const UTC_JST = 9 * time.HOUR;
   const _1_DAY = 1 * time.DAY;
-  const yesterday = new Date(Date.now() + UTC_JST - _1_DAY);
+  const yesterday = opts.date
+    ? new Date(opts.date)
+    : new Date(Date.now() + UTC_JST - _1_DAY);
+
   const endpoint = db.baseurl + time.format(yesterday, "yyyy/MM/dd") + ".json";
   const dbres = await fetch(endpoint);
   console.log("DB:", dbres.status, dbres.statusText);
@@ -35,8 +44,6 @@ const __main__ = async (args: string[]) => {
     return anime.songs?.map((song): SearchItem => ({ anime, song })) || [];
   });
 
-  const dry = !!(args.length && (args[0] == "--dry"));
-
   // Execute YouTube search for each
   const tracks = await Promise.all(
     items.map(async (item): Promise<Track | undefined> => {
@@ -52,7 +59,7 @@ const __main__ = async (args: string[]) => {
         key: Deno.env.get("YOUTUBE_API_KEY") as string,
       });
 
-      if (dry) {
+      if (opts.debug) {
         console.log("Query:", keyword);
         return;
       }
@@ -103,10 +110,10 @@ const __main__ = async (args: string[]) => {
   console.log("File:", fname);
 
   // Write to a file
-  await upsertTrackFile(dirpath, fname, tracks as Track[], dry);
+  await upsertTrackFile(dirpath, fname, tracks as Track[], opts.debug);
 
   // Update index
-  await updateIndexFile(fpath, fname, dry);
+  await updateIndexFile(fpath, fname, opts.debug);
 };
 
 async function upsertTrackFile(
