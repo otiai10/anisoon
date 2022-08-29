@@ -59,11 +59,11 @@ const __main__ = async (args: string[]) => {
         key: Deno.env.get("YOUTUBE_API_KEY") as string,
       });
 
+      await sleep(Math.random() * 360 * 1000);
       if (opts.debug) {
         console.log("Query:", keyword);
         return;
       }
-      await sleep(Math.random() * 10 * 1000);
 
       const ytres = await fetch(YouTubeSearchAPI + "?" + query.toString());
       const response: GoogleAppsScript.YouTube.Schema.SearchListResponse =
