@@ -19,7 +19,7 @@ const __main__ = async (args: string[]) => {
   const opts = flags.parse(args, { alias: { d: "date", D: "debug" } });
 
   const db = {
-    baseurl: "https://raw.githubusercontent.com/otiai10/syobocal/main/db/",
+    baseurl: "https://raw.githubusercontent.com/animegeek/syobocaldb/main/",
   };
 
   const UTC_JST = 9 * time.HOUR;
