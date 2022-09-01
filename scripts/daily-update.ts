@@ -45,60 +45,12 @@ const __main__ = async (args: string[]) => {
   });
 
   // Execute YouTube search for each
-  const tracks = await Promise.all(
-    items.map(async (item): Promise<Track | undefined> => {
-      const keyword =
-        `${item.song.title} ${item.anime.title} ${item.song.label}`;
-      const query = new URLSearchParams({
-        part: "snippet",
-        maxResults: "10",
-        q: `${item.song.title} ${item.anime.title} ${item.song.label}`,
-        regionCode: "JP",
-        type: "video",
-        videoDuration: "short",
-        key: Deno.env.get("YOUTUBE_API_KEY") as string,
-      });
-
-      await sleep(Math.random() * 360 * 1000);
-      if (opts.debug) {
-        console.log("Query:", keyword);
-        return;
-      }
-
-      const ytres = await fetch(YouTubeSearchAPI + "?" + query.toString());
-      const response: GoogleAppsScript.YouTube.Schema.SearchListResponse =
-        await ytres.json();
-      console.log("YouTube:", ytres.status, ytres.statusText, keyword);
-      if (ytres.status != 200) {
-        console.error(response);
-        throw new Error(
-          `failed to fetch YouTube: ${ytres.status} ${ytres.statusText}`,
-        );
-      }
-      query.delete("key");
-      return {
-        ...item,
-        youtube: {
-          query: {
-            keyword,
-            params: query.toString(),
-            found: response.items!.length,
-          },
-          videos: (response.items || []).map((item) => ({
-            id: item.id!.videoId!,
-            kind: item.id!.kind!,
-            title: item.snippet!.title!,
-            publishedAt: item.snippet!.publishedAt!,
-            thumbnails: item.snippet!.thumbnails!,
-            channel: {
-              id: item.snippet!.channelId!,
-              title: item.snippet!.channelTitle!,
-            },
-          })),
-        },
-      };
-    }),
-  );
+  const promises: Promise<Track | undefined>[] = [];
+  for (const item of items) {
+    await sleep(Math.random() * 180 * 1000);
+    promises.push(searchYouTube(item, opts));
+  }
+  const tracks = await Promise.all(promises);
 
   const fpath = path.join(
     ...entry.context.output.split(path.posix.sep).slice(-3, -1),
@@ -129,6 +81,64 @@ async function upsertTrackFile(
     await Deno.mkdir(dirpath, { recursive: true });
     await Deno.writeTextFile(path.join(dirpath, fname), JSON.stringify(tracks));
   }
+}
+
+async function searchYouTube(
+  item: SearchItem,
+  opts: {
+    [x: string]: any;
+    _: (string | number)[];
+  },
+): Promise<Track | undefined> {
+  const keyword = `${item.song.title} ${item.anime.title} ${item.song.label}`;
+  const query = new URLSearchParams({
+    part: "snippet",
+    maxResults: "5",
+    q: `${item.song.title} ${item.anime.title} ${item.song.label}`,
+    regionCode: "JP",
+    type: "video",
+    videoDuration: "short",
+    key: Deno.env.get("YOUTUBE_API_KEY") as string,
+  });
+
+  await sleep(Math.random() * 360 * 1000);
+  if (opts.debug) {
+    console.log("Query:", keyword);
+    return;
+  }
+
+  const ytres = await fetch(YouTubeSearchAPI + "?" + query.toString());
+  const response: GoogleAppsScript.YouTube.Schema.SearchListResponse =
+    await ytres.json();
+  console.log("YouTube:", ytres.status, ytres.statusText, keyword);
+  if (ytres.status != 200) {
+    console.error(response);
+    throw new Error(
+      `failed to fetch YouTube: ${ytres.status} ${ytres.statusText}`,
+    );
+  }
+  query.delete("key");
+  return {
+    ...item,
+    youtube: {
+      query: {
+        keyword,
+        params: query.toString(),
+        found: response.items!.length,
+      },
+      videos: (response.items || []).map((item) => ({
+        id: item.id!.videoId!,
+        kind: item.id!.kind!,
+        title: item.snippet!.title!,
+        publishedAt: item.snippet!.publishedAt!,
+        thumbnails: item.snippet!.thumbnails!,
+        channel: {
+          id: item.snippet!.channelId!,
+          title: item.snippet!.channelTitle!,
+        },
+      })),
+    },
+  };
 }
 
 async function updateIndexFile(fpath: string, fname: string, dry = false) {
